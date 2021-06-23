@@ -1,0 +1,9 @@
+# Ignore Virtualenv, Dataset
+
+
+venv/*
+dataset/*
+
+
+__pycache__/*
+*.pyc
