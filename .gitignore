@@ -7,3 +7,8 @@ dataset/*
 
 __pycache__/*
 *.pyc
+.mypy_cache
+
+
+.vscode/*
+
