@@ -300,45 +300,41 @@ class Model(nn.Module):
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, gamma=1.5, alpha=0.25, beta=0.2, reduction="mean"):
+    def __init__(self, gamma=1.5, alpha=0.25,reduction=torch.sum):
         super(FocalLoss, self).__init__()
-        self.loss_fcn = nn.BCEWithLogitsLoss(reduction=reduction)
+        self.loss_fcn = nn.BCEWithLogitsLoss(reduction="none")
         self.gamma = gamma
         self.alpha = alpha
-        self.beta = beta
-        self.reduction = self.loss_fcn.reduction
-        self.loss_fcn.reduction = "none"
+        self.reduction = reduction
 
     def forward(self, pred, true,mask):
+        true = true[mask != -1]
+        pred = pred[mask != -1]
         loss = self.loss_fcn(pred, true)
         pred_prob = torch.sigmoid(pred)
         alpha_factor = true * self.alpha + (1 - true) * (1 - self.alpha)
         modulating_factor = torch.abs(true - pred_prob) ** self.gamma
         loss *= alpha_factor * modulating_factor
-        loss_masked = torch.gather(loss,-1,mask)
-        if self.reduction == "mean":
-            return loss_masked + loss.mean() * self.beta
-        elif self.reduction == "sum":
-            return loss_masked + loss.sum() * self.beta
-        else:  # 'none'
-            return loss_masked + loss * self.beta
+        norm = torch.maximum(torch.tensor(1),torch.tensor(mask.size(0)))
+        if not self.reduction:
+            return loss/norm
+        return self.reduction(loss)/norm
+        
 
 
 class SmoothL1(nn.Module):
-    def __init__(self,sigma=3.0, reduction="mean"):
+    def __init__(self,sigma=3.0, reduction=torch.sum):
         super().__init__()
         self.sigma = sigma
         self.reduction = reduction
 
     def forward(self,preds,targets,mask):
-        loss = F.smooth_l1_loss(preds,targets,beta=self.sigma,reduction="none")
-        loss_masked = torch.gather(loss,-1,mask)
-        if self.reduction == "mean":
-            return loss_masked
-        elif self.reduction == "sum":
-            return loss_masked
-        else:  # 'none'
-            return loss_masked
+        loss = F.huber_loss(preds,targets,reduction='none',delta=self.sigma)
+        loss = loss[mask != -1]
+        norm = torch.maximum(torch.tensor(1),torch.tensor(mask.size(0)))
+        if not self.reduction:
+            return self.reduction/norm
+        return self.reduction(loss)/norm
 
 class LossFN(nn.Module):
     def __init__(
@@ -359,13 +355,6 @@ class LossFN(nn.Module):
         self.reduction = reduction
 
     def forward(self, p, t, m):
-        clsLoss = self.cls_loss(p[..., : self.classes], t[..., : self.classes],m[..., : self.classes])
-        regLoss = self.reg_loss(p[..., self.classes :], t[..., self.classes :],m[..., self.classes :])
-        norm = torch.maximum(torch.tensor(1),torch.tensor(m.size(0)))
-        if self.reduction == "sum":
-            regLoss = regLoss.sum() / norm
-            clsLoss = clsLoss.sum() / norm
-        elif self.reduction == "mean":
-            regLoss = torch.sum(regLoss,dim=-1).mean()
-            clsLoss = torch.sum(clsLoss,dim=-1).mean()
+        clsLoss = self.cls_loss(p[..., : self.classes], t[..., : self.classes],m)
+        regLoss = self.reg_loss(p[..., self.classes :], t[..., self.classes :],m)
         return self.wc * clsLoss + self.wr * regLoss

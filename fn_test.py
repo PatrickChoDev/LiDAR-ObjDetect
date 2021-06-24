@@ -33,15 +33,18 @@ def checkLoss():
     cls_target = torch.rand(4, 1024,8)
     reg_target = torch.rand(4, 1024, 7)
     target = torch.cat([cls_target, reg_target], dim=-1)
+    # target = pred
     loss_fn = LossFN()
-    loss = loss_fn(pred, target, torch.randint(0,1,(4,1024,1)))
+    loss = loss_fn(pred, target, torch.randint(0,2,(4,1024)))
     print("Loss shape :", loss.shape)
     try:
-        loss.backward()
         print(f"Loss : {loss.item():.3f}")
+        loss.backward()
         print("Accepted!!")
     except:
+
         print("Unable to do backward")
+        loss.backward()
 
 
 checkModel(True)

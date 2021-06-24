@@ -1,16 +1,6 @@
-import torch
 import numpy as np
 from numpy import *
 from scipy.spatial import ConvexHull
-
-
-
-def size_IoU(box,base):
-    h = torch.minimum(box[0],base[0])
-    w = torch.minimum(box[1],base[1])
-    l = torch.minimum(box[2],base[2])
-    intersect = h*w*l
-    return intersect / (torch.prod(box) + torch.prod(base) - intersect)
 
 
 def polygon_clip(subjectPolygon, clipPolygon):
@@ -49,7 +39,6 @@ def polygon_clip(subjectPolygon, clipPolygon):
    return(outputList)
 
 def poly_area(x,y):
-    """ Ref: http://stackoverflow.com/questions/24467972/calculate-area-of-polygon-given-x-y-coordinates """
     return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
 
 def convex_hull_intersection(p1, p2):
