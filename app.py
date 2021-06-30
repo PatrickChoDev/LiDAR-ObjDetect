@@ -1,28 +1,13 @@
-from re import sub
-import subprocess
 import glob
+import PIL.Image as IMG
 import streamlit as st
+import numpy as np
+
 
 MURL = ""
 st.title("3D object detection with point cloud")
-st.subheader("Please upload your point cloud data as `.bin` file and we'll process")
+st.info(f"I use KITTI dataset for training this model based on OpenPCDet powered by MMLab. The model is constructed based on PointPillars achitecture by Facebook, but I've change something inside the backbone. Thanks for enjoying my experimental :-3")
 
-fname = st.selectbox("", glob.glob("dataset/training/velodyne_reduced/*"))
-
-if fname is None:
-    st.text("Please upload valid file :(")
-else:
-    # process = subprocess.Popen(
-    #     [
-    #         "python",
-    #         ".//LiDAR-3D-Detector/tools/demo.py",
-    #         "--ckpt",
-    #         "./LiDAR-3D-Detector/output/kitti_models/3DSSD_openPCDet/3DSSD/ckpt/checkpoint_epoch_80.pth",
-    #         '--cfg_file',
-    #         './LiDAR-3D-Detector/output/kitti_models/3DSSD_openPCDet/3DSSD/3DSSD_openPCDet.yaml'
-    #         '--data-path',
-    #         fname
-    #     ]
-    # )
-    # st.text(process.stdout)
-    st.image(fname)
+fname = st.selectbox("", glob.glob("dataset/snapshot/*"))
+st.text("Please select our point cloud data it'll show you our results")
+st.image(IMG.open(fname))
