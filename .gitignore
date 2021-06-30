@@ -13,3 +13,5 @@ __pycache__/*
 .vscode/*
 
 *.pth
+
+!LiDAR-3D-Detector/output/kitti_models/3DSSD_openPCDet/3DSSD/ckpt/checkpoint_epoch_80.pth
