@@ -29,13 +29,17 @@ def checkModel(train=True):
         print("Time taken :", e - s)
 
 def checkLoss():
-    pred = torch.rand(4, 1024, 15, requires_grad=True)
-    cls_target = torch.rand(4, 1024,8)
-    reg_target = torch.rand(4, 1024, 7)
+    cls_target = torch.rand(4, 100,10)
+    reg_target = torch.rand(4,100,7)
+    pred = torch.cat([cls_target, reg_target], dim=-1)
+    pred.requires_grad=True
+    cls_target = torch.randint(10,(4, 100,10))
+    reg_target = torch.rand(4,100,7)
     target = torch.cat([cls_target, reg_target], dim=-1)
     # target = pred
-    loss_fn = LossFN()
-    loss = loss_fn(pred, target, torch.randint(0,2,(4,1024)))
+    print(pred.shape,target.shape)
+    loss_fn = LossFN(n_classes=10)
+    loss = loss_fn(pred, target)
     print("Loss shape :", loss.shape)
     try:
         print(f"Loss : {loss.item():.3f}")
@@ -47,5 +51,5 @@ def checkLoss():
         loss.backward()
 
 
-checkModel(True)
+# checkModel(True)
 checkLoss()
