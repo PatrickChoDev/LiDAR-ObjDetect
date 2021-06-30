@@ -3,7 +3,8 @@
 
 venv/*
 dataset/*
-
+!dataset/snapshot
+# !dataset/training/velodyne_reduced
 
 __pycache__/*
 *.pyc
@@ -14,4 +15,3 @@ __pycache__/*
 
 *.pth
 
-!LiDAR-3D-Detector/output/kitti_models/3DSSD_openPCDet/3DSSD/ckpt/checkpoint_epoch_80.pth
